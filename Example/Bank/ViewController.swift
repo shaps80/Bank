@@ -7,18 +7,55 @@
 //
 
 import UIKit
+import LoremIpsum
+import Bank
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITableViewDataSource {
+  
+  @IBOutlet var tableView: UITableView!
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+  override func viewDidLoad() {
+    super.viewDidLoad()
+
+    if Caches.peopleCache().allEntities().count == 0 {
+      prepareDataSource()
     }
+  }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+  func prepareDataSource() {
+    for _ in 0..<50 {
+      let entity = Entity()
+
+      var person = Person(id: entity.identifier)
+      person.name = LoremIpsum.name()
+      person.age = Int(arc4random_uniform(35) + 18)
+
+      let cache = Caches.peopleCache()
+      try! cache.addEntity(entity, person)
     }
-
+  }
+  
+  func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    let cell = tableView.dequeueReusableCellWithIdentifier("Cell")!
+    let entity = Caches.peopleCache().allEntities()[indexPath.item]
+    
+    Caches.peopleCache().fetchResourceForEntity(entity) { (result) in
+      switch result {
+      case .Success(let person):
+        cell.textLabel?.text = person.name
+        cell.detailTextLabel?.text = "\(person.age)"
+      case .Failure(let error):
+        print(error)
+      }
+    }
+    
+    cell.imageView?.setCachedImage(Caches.imageCache(), identifier: "1234", remoteURI: "http://lorempixel.com/g/400/400/")
+    return cell
+  }
+  
+  func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    return Caches.peopleCache().allEntities().count
+  }
+  
 }
 

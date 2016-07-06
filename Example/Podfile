@@ -2,6 +2,7 @@ use_frameworks!
 
 target 'Bank_Example' do
   pod 'Bank', :path => '../'
+  pod 'LoremIpsum'
 
   target 'Bank_Tests' do
     inherit! :search_paths

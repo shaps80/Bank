@@ -1,0 +1,6 @@
+framework module Bank {
+  umbrella header "Bank-umbrella.h"
+
+  export *
+  module * { export * }
+}

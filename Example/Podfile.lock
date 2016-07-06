@@ -1,0 +1,19 @@
+PODS:
+  - Bank (1.0.0)
+  - LoremIpsum (1.0.0)
+
+DEPENDENCIES:
+  - Bank (from `../`)
+  - LoremIpsum
+
+EXTERNAL SOURCES:
+  Bank:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Bank: 4afd92c2c0cb5661ecfab76808b23ab92b08e4c1
+  LoremIpsum: 9029c55d36501b2ee0b05cc9ecda11d3a0479160
+
+PODFILE CHECKSUM: 0d7a76fe2507e70bf96856377128e31acd46ecdd
+
+COCOAPODS: 1.0.0
