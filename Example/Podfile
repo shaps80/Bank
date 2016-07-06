@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'Bank_Example' do
+  pod 'Bank', :path => '../'
+
+  target 'Bank_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
