@@ -157,6 +157,8 @@ public final class Cache<E: EntityType, T: Resource>: CustomStringConvertible {
    - parameter completion: The completion block to execute when this resource has been fetched
    */
   public final func fetchResourceForEntity(entity: E, completion: CacheFetchResult<T> -> Void) {
+    var resourceToPropagate: T?
+    
     for store in stores {
       if !store.canFulfillFetch(for: entity) {
         continue
@@ -165,6 +167,7 @@ public final class Cache<E: EntityType, T: Resource>: CustomStringConvertible {
       store.read(for: entity) { (result: CacheFetchResult<T>) in
         switch result {
         case .Success(let resource):
+          resourceToPropagate = resource
           completion(CacheFetchResult.Success(resource))
         case .Failure(let error):
           completion(CacheFetchResult.Failure(error))
@@ -172,6 +175,11 @@ public final class Cache<E: EntityType, T: Resource>: CustomStringConvertible {
       }
       
       break
+    }
+    
+    if let resource = resourceToPropagate {
+      let stores = self.stores.flatMap { $0 as? WritableStore }
+      stores.forEach { $0.write(for: entity, resource: resource) }
     }
     
     saveChanges()
