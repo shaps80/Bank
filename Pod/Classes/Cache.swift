@@ -27,7 +27,28 @@ public final class Cache<E: EntityType, T: Resource>: CustomStringConvertible {
     
     self.name = name
     self.stores = stores
+    
     loadEntities()
+    cleanup()
+  }
+  
+  // this function will iterate over all entities and ensure the resource can still be fulfilled, otherwise it will cleanup and remove the entity completely to avoid null references
+  private func cleanup() {
+    for entity in entities {
+      var canFulfill = false
+      
+      for store in stores {
+        if store.canFulfillFetch(for: entity) {
+          canFulfill = true
+        }
+      }
+      
+      if !canFulfill {
+        entities.remove(entity)
+      }
+    }
+    
+    saveChanges()
   }
   
   private func loadEntities() {
