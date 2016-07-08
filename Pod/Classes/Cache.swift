@@ -181,8 +181,6 @@ public final class Cache<E: EntityType, T: Resource>: CustomStringConvertible {
       let stores = self.stores.flatMap { $0 as? WritableStore }
       stores.forEach { $0.write(for: entity, resource: resource) }
     }
-    
-    saveChanges()
   }
   
   /**
