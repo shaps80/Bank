@@ -126,9 +126,10 @@ public final class Cache<E: EntityType, T: Resource>: CustomStringConvertible {
         localEntities.append(entity) // add to our results array
         self.entities.insert(entity) // add to our global entities
       }
+      
+      saveChanges()
     }
     
-    saveChanges()
     return localEntities
   }
   
@@ -145,7 +146,9 @@ public final class Cache<E: EntityType, T: Resource>: CustomStringConvertible {
     
     for store in stores {
       if let writableStore = store as? WritableStore, res = resource {
-        writableStore.write(for: entity, resource: res)
+        writableStore.write(for: entity, resource: res, completion: { (result) in
+          // do nothing for now
+        })
       }
     }
   }
@@ -157,30 +160,28 @@ public final class Cache<E: EntityType, T: Resource>: CustomStringConvertible {
    - parameter completion: The completion block to execute when this resource has been fetched
    */
   public final func fetchResourceForEntity(entity: E, completion: CacheFetchResult<T> -> Void) {
-    var resourceToPropagate: T?
-    
-    for store in stores {
-      if !store.canFulfillFetch(for: entity) {
-        continue
-      }
-      
-      store.read(for: entity) { (result: CacheFetchResult<T>) in
-        switch result {
-        case .Success(let resource):
-          resourceToPropagate = resource
-          completion(CacheFetchResult.Success(resource))
-        case .Failure(let error):
-          completion(CacheFetchResult.Failure(error))
+    let fetchStores = stores.filter { $0.canFulfillFetch(for: entity) }
+
+    fetchStores.first?.read(for: entity, completion: { (result: CacheFetchResult<T>) in
+      switch result {
+      case .Success(let resource):
+        Queue.Background.async {
+          let stores = self.stores.flatMap { $0 as? WritableStore }
+          
+          stores.first?.write(for: entity, resource: resource) { (result: CacheFetchResult<T>) in
+            Queue.Main.async {
+              self.stores.first?.read(for: entity, completion: completion)
+            }
+          }
+          
+          stores.dropFirst().forEach {
+            $0.write(for: entity, resource: resource, completion: { (result) in })
+          }
         }
+      case .Failure(let error):
+        completion(CacheFetchResult.Failure(error))
       }
-      
-      break
-    }
-    
-    if let resource = resourceToPropagate {
-      let stores = self.stores.flatMap { $0 as? WritableStore }
-      stores.forEach { $0.write(for: entity, resource: resource) }
-    }
+    })
   }
   
   /**

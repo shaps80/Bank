@@ -44,12 +44,12 @@ class ViewController: UIViewController, UITableViewDataSource {
       case .Success(let person):
         cell.textLabel?.text = person.name
         cell.detailTextLabel?.text = "\(person.age)"
+        cell.imageView?.setCachedImage(Caches.imageCache(), identifier: "1234", remoteURI: "http://lorempixel.com/g/400/400/")
       case .Failure(let error):
         print(error)
       }
     }
     
-    cell.imageView?.setCachedImage(Caches.imageCache(), identifier: "1234", remoteURI: "http://lorempixel.com/g/400/400/")
     return cell
   }
   

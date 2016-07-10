@@ -11,12 +11,16 @@ import Foundation
 public enum CacheError: ErrorType {
   case MissingEntity
   case DuplicateEntity
+  case FailedToReadResource
+  case FailedToWriteResource
+  case InvalidData
+  case CouldNotFulfillFetch
 }
 
 public enum CacheFetchResult<T: Resource> {
   
   case Success(T)
-  case Failure(NSError?)
+  case Failure(CacheError?)
   
 }
 

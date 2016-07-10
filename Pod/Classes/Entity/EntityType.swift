@@ -9,7 +9,7 @@
 import Foundation
 
 public protocol EntityType: class, Hashable {
-  var identifier: String! { get }
+  var identifier: String { get }
   
   init(identifier: String)
   init(jsonRepresentation json: [String: AnyObject])

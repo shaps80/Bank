@@ -26,7 +26,7 @@ public final class DiskStore: WritableStore, DeletableStore {
   
   private func pathForEntity<E: EntityType>(entity: E) -> String {
     let rootPath = localPath as NSString
-    return rootPath.stringByAppendingPathComponent("\(entity.identifier).resource")
+    return rootPath.stringByAppendingPathComponent(entity.identifier + ".resource")
   }
   
   public init(name: String, localPath: String? = nil) {
@@ -47,13 +47,13 @@ public final class DiskStore: WritableStore, DeletableStore {
         } else {
           completion(.Failure(nil))
         }
-      } catch let error as NSError {
-        completion(.Failure(error))
+      } catch let error {
+        completion(.Failure(.InvalidData))
       }
     }
   }
   
-  public func write<E : EntityType, T : Resource>(for entity: E, resource: T) {
+  public func write<E : EntityType, T : Resource>(for entity: E, resource: T, completion: CacheFetchResult<T> -> Void) {
     Queue(queue: DiskStore.ioQueue).async {
       if !NSFileManager.defaultManager().fileExistsAtPath(self.localPath) {
         try! NSFileManager.defaultManager().createDirectoryAtPath(self.localPath, withIntermediateDirectories: true, attributes: nil)
@@ -61,8 +61,9 @@ public final class DiskStore: WritableStore, DeletableStore {
       
       do {
         try resource.dataRepresentation().writeToFile(self.pathForEntity(entity), options: .DataWritingAtomic)
-      } catch let error as NSError {
-        print(error)
+        completion(.Success(resource))
+      } catch {
+        completion(.Failure(.FailedToWriteResource))
       }
     }
   }

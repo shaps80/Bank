@@ -10,7 +10,7 @@ import Foundation
 
 public final class RemoteEntity: EntityType {
   
-  public let identifier: String!
+  public let identifier: String
   public var remoteURI: String?
   
   public init(identifier: String = NSUUID().UUIDString) {
@@ -21,7 +21,7 @@ public final class RemoteEntity: EntityType {
     guard let identifier = json["identifier"] as? String,
       remoteURI = json["remoteURI"] as? String
       else {
-        fatalError("Identifier and remoteURI not found!")
+        fatalError("Identifier or remoteURI not found!")
     }
     
     self.identifier = identifier
@@ -30,7 +30,7 @@ public final class RemoteEntity: EntityType {
   
   public func jsonRepresentation() -> [String : AnyObject] {
     var json = [
-      "identifier": identifier,
+      "identifier": identifier
     ]
     
     if let uri = remoteURI { json["remoteURI"] = uri }

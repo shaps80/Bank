@@ -10,7 +10,7 @@ import Foundation
 
 public final class Entity: EntityType {
   
-  public let identifier: String!
+  public let identifier: String
   
   public init(identifier: String = NSUUID().UUIDString) {
     self.identifier = identifier

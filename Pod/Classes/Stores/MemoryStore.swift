@@ -40,8 +40,9 @@ public final class MemoryStore: WritableStore, DeletableStore, FaultableStore {
     completion(.Success(resource))
   }
   
-  public func write<E : EntityType, T : Resource>(for entity: E, resource: T) {
+  public func write<E : EntityType, T : Resource>(for entity: E, resource: T, completion: CacheFetchResult<T> -> Void) {
     nsCache.setObject(resource.dataRepresentation(), forKey: entity.identifier)
+    completion(.Success(resource))
   }
   
   public func delete<E : EntityType>(for entity: E) {

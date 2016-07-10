@@ -17,7 +17,7 @@ public protocol ReadableStore: CacheStore {
 }
 
 public protocol WritableStore: ReadableStore {
-  func write<E: EntityType, T: Resource>(for entity: E, resource: T)
+  func write<E: EntityType, T: Resource>(for entity: E, resource: T, completion: CacheFetchResult<T> -> Void)
 }
 
 public protocol DeletableStore: CacheStore {

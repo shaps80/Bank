@@ -18,18 +18,25 @@ extension UIImageView {
   public func setCachedImage<E: EntityType>(cache: Cache<E, UIImage>, identifier: String, remoteURI: String, placeholderImage placeholder: UIImage? = nil, animationStyle animation: CacheAnimationStyle = .CrossDissolve) -> E? {
     updateImage(placeholder, placeholder: placeholder, withAnimationStyle: .None)
     
-    guard let entity = cache.entities(identifier).first else { return nil }
+    guard let entity = cache.entities(identifier, autoCreate: true).first else { return nil }
     
+    if let remote = entity as? RemoteEntity {
+      remote.remoteURI = remoteURI
+    }
+  
     cache.fetchResourceForEntity(entity) { result in
       switch result {
       case .Success(let image) where entity.identifier == identifier:
         self.updateImage(image, placeholder: placeholder, withAnimationStyle: animation)
-      case .Failure(let error): print(error)
+      case .Failure(let error):
+        print(error)
+        break
       default: break
       }
     }
     
     return entity
+    
   }
   
   private func updateImage(image: UIImage?, placeholder: UIImage?, withAnimationStyle animation: CacheAnimationStyle) {
@@ -39,7 +46,7 @@ extension UIImageView {
     }
     
     self.image = image
-    guard animation != .None else { return }
+    guard animation != .None && self.image == nil else { return }
     
     switch animation {
     case .CrossDissolve:
